@@ -3,6 +3,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import os
 from dotenv import load_dotenv
+from selenium.webdriver.support.ui import Select
+from datetime import timedelta
+from datetime import datetime
+
+# Set env vars from .env file (for password)
 load_dotenv('.env')
 
 # Rentcafe credentials
@@ -19,8 +24,6 @@ driver.find_element(By.ID, "Username").send_keys(username)
 driver.find_element(By.ID, "Password").send_keys(password)
 # click login button
 driver.find_element(By.NAME, "SignIn").click()
-
-
 # wait the ready state to be complete
 WebDriverWait(driver=driver, timeout=10).until(
     lambda x: x.execute_script("return document.readyState === 'complete'")
@@ -28,7 +31,18 @@ WebDriverWait(driver=driver, timeout=10).until(
 # navigate to reservation page
 driver.get("https://www.rentcafe.com/residentservices/apartmentsforrent/conciergereservations.aspx#tab_MakeAReservation")
 # Select Amenity
-# driver.find_element(By.ID("ResourceID")).click()
+dd_amenity = Select(driver.find_element(By.ID("ResourceID")))
+dd_amenity.select_by_visible_text('Capstone Range') # can also select by value = 234
+# Set date
+next_week = datetime.now() + timedelta(weeks=1)
+driver.find_element(By.ID, "StartDate").send_keys(next_week.strftime("%m/%d/%Y"))
+# Set time
+Select(driver.find_element(By.ID, "AmPmStart")).select_by_visible_text('PM') # if this works convert top^
+Select(driver.find_element(By.ID, "HoursStart")).select_by_visible_text('7')
+# Create Reservation (first submit button)
+driver.find_element(By.ID, "btnCreateReservation").click()
+# Maybe add verification that cost is 0?
+driver.find_element(By.ID, "btnPayNow").click()
 
 # close the driver
 driver.close()
