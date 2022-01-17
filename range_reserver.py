@@ -11,7 +11,7 @@ from datetime import datetime
 load_dotenv('.env')
 
 # Rentcafe credentials
-username = "shaural@live.com"
+username = os.getenv("RENTCAFE_USERNAME")
 password = os.getenv("RENTCAFE_PASSWORD")
 
 # initialize the Chrome driver
@@ -25,17 +25,22 @@ driver.find_element(By.ID, "Password").send_keys(password)
 # click login button
 driver.find_element(By.NAME, "SignIn").click()
 # wait the ready state to be complete
-WebDriverWait(driver=driver, timeout=10).until(
-    lambda x: x.execute_script("return document.readyState === 'complete'")
+WebDriverWait(driver, 10).until(
+    lambda x: x.find_element(By.ID, "LoggedInAsName")
 )
 # navigate to reservation page
 driver.get("https://www.rentcafe.com/residentservices/apartmentsforrent/conciergereservations.aspx#tab_MakeAReservation")
+# wait the ready state to be complete
+WebDriverWait(driver, 10).until(
+    lambda x: x.find_element(By.ID, "ResourceId")
+)
 # Select Amenity
-dd_amenity = Select(driver.find_element(By.ID("ResourceID")))
-dd_amenity.select_by_visible_text('Capstone Range') # can also select by value = 234
+Select(driver.find_element(By.ID, "ResourceId")).select_by_visible_text('Capstone Range') # can also select by value = 234
 # Set date
 next_week = datetime.now() + timedelta(weeks=1)
-driver.find_element(By.ID, "StartDate").send_keys(next_week.strftime("%m/%d/%Y"))
+start_date_element = driver.find_element(By.ID, "StartDate")
+start_date_element.clear()
+start_date_element.send_keys(next_week.strftime("%m/%d/%Y"))
 # Set time
 Select(driver.find_element(By.ID, "AmPmStart")).select_by_visible_text('PM') # if this works convert top^
 Select(driver.find_element(By.ID, "HoursStart")).select_by_visible_text('7')
